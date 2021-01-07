@@ -17,6 +17,6 @@ public class MainStart extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("resources/main_window"));
         primaryStage.setTitle("Lesson 4");
         primaryStage.setScene(new Scene(root));
-        primaryStage.show();
+        primaryStage.show();//
     }
 }
