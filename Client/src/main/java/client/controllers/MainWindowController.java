@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class MainWindowController {
 
@@ -30,6 +31,7 @@ public class MainWindowController {
     private Label usernameTitle;
 
     private Network network;
+    private String selectedRecipient;
 
     public void setLabel(String usernameTitle) {
         this.usernameTitle.setText(usernameTitle);
@@ -41,7 +43,7 @@ public class MainWindowController {
 
     @FXML
     public void initialize() {
-        listView.setItems(FXCollections.observableArrayList(Client.USERS_TEST_DATA));
+
         button.setOnAction(event -> MainWindowController.this.sendMessage());
         textField.setOnAction(event -> MainWindowController.this.sendMessage());
     }
@@ -51,8 +53,20 @@ public class MainWindowController {
         appendMessage("Я: " + message);
         textField.clear();
 
+        if(message.isBlank()) {
+            return;
+        }
+
+        appendMessage("Я: " + message);
+        textField.clear();
+
         try {
-            network.sendMessage(message);
+            if (selectedRecipient != null) {
+                network.sendPrivateMessage(message, selectedRecipient);
+            }
+            else {
+                network.sendMessage(message);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -72,5 +86,8 @@ public class MainWindowController {
 
     public void setUsernameTitle(String username) {
 
+    }
+    public void updateUsers(List<String> users) {
+        listView.setItems(FXCollections.observableArrayList(users));
     }
 }

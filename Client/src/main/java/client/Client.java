@@ -1,5 +1,6 @@
 package client;
 
+
 import client.controllers.AuthController;
 import client.controllers.MainWindowController;
 import client.models.Network;
@@ -12,12 +13,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.List;
 
 public class Client extends Application {
-
-
-    public static final List<String> USERS_TEST_DATA = List.of("Костя", "Надя", "Гендальф_Серый");
     private Stage primaryStage;
     private Stage authStage;
     private Network network;
@@ -40,7 +37,7 @@ public class Client extends Application {
 
     private void openAuthWindow() throws IOException {
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(Client.class.getResource("/auth-window.fxml"));
+        loader.setLocation(Client.class.getResource("auth-window.fxml"));
         Parent root = loader.load();
         authStage = new Stage();
 

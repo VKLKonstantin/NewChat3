@@ -3,6 +3,7 @@ package chat;
 import chat.auth.AuthService;
 import chat.auth.BaseAuthService;
 import chat.handler.ClientHandler;
+import clientservice.Command;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -26,7 +27,7 @@ public class MyServer {
 
     public void start() throws IOException {
         System.out.println("Сервер запущен");
-        authService.start();
+       authService.start();
 
         try {
             while (true) {
@@ -42,6 +43,8 @@ public class MyServer {
     private void waitNewClientConnection() throws IOException {
         System.out.println("Ожидание клинта");
         Socket clientSocket = serverSocket.accept();
+        clientSocket.setSoTimeout(120000);//отключение неавторизованных пользователей по таймауту
+        //   (120 сек. ждем после подключения клиента. Если он не авторизовался за это время, закрываем соединение).
         System.out.println("Клиент подключился");
         processConnectionClient(clientSocket);
     }
@@ -56,15 +59,25 @@ public class MyServer {
         return authService;
     }
 
-    public void subscribe(ClientHandler clientHandler) {//добавление клиента
+    public synchronized void subscribe(ClientHandler clientHandler) throws IOException {//добавление клиента
         clients.add(clientHandler);
+        List<String> usernames = getAllUsernames();
+        broadcastMessage(null, Command.updateUsersListCommand(usernames));
     }
-
-    public void unSubscribe(ClientHandler clientHandler) {//удаление клиента
+    private List<String> getAllUsernames() {
+        List<String> usernames = new ArrayList<>();
+        for (ClientHandler client : clients) {
+            usernames.add(client.getUsername());
+        }
+        return usernames;
+    }
+    public synchronized void unSubscribe(ClientHandler clientHandler) throws IOException {
         clients.remove(clientHandler);
+        List<String> usernames = getAllUsernames();
+        broadcastMessage(null, Command.updateUsersListCommand(usernames));
     }
 
-    public boolean isUsernameBusy(String username) {//проверка, не занет ли никнейм
+    public synchronized boolean isUsernameBusy(String username) {//проверка, не занет ли никнейм
         for (ClientHandler client : clients) {
             if (client.getUsername().equals(username)) {
                 return true;
@@ -73,13 +86,20 @@ public class MyServer {
         return false;
 
     }
-    public void broadcastMessage(String message, ClientHandler sender, boolean isServerInfoMsg) throws IOException {//оповестить всех пользователей о подключении новичка
+    public synchronized void broadcastMessage(ClientHandler sender, Command command) throws IOException {//оповестить всех пользователей о подключении новичка
         for (ClientHandler client : clients) {
             if(client == sender) {//если клиент является отправителем, то мы его игнорируем
                 continue;
             }
-            client.sendMessage(isServerInfoMsg ? null : sender.getUsername(), message);//если флаг(isServerInfoMsg) true, то серверное сообщение
-            //иначе передается имя пользователя
+            client.sendMessage(command);
+        }
+    }
+    public synchronized void sendPrivateMessage(String recipient, Command command) throws IOException {
+        for (ClientHandler client : clients) {
+            if (client.getUsername().equals(recipient)) {
+                client.sendMessage(command);
+                break;
+            }
         }
     }
 }
