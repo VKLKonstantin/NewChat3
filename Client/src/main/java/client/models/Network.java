@@ -88,7 +88,11 @@ public class Network {//отвечает за связь с сервером
                             String sender = data.getSender();
                             String formattedMessage = sender != null ? String.format("%s: %s", sender, message) : message;
                             Platform.runLater(() -> {
-                                mainWindowController.appendMessage(formattedMessage);
+                                try {
+                                    mainWindowController.appendMessage(formattedMessage);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                             });
                             break;
                         }

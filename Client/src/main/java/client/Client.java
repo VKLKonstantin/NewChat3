@@ -82,7 +82,7 @@ public class Client extends Application {
         launch(args);
     }
 
-    public void openMainChatWindow() {
+    public void openMainChatWindow() throws IOException {
         authStage.close();
         primaryStage.show();
 
@@ -90,6 +90,7 @@ public class Client extends Application {
         primaryStage.setAlwaysOnTop(true);
         mainWindowController.setLabel(network.getUsername());
         network.waitMessage(mainWindowController);
+        mainWindowController.load100HistoryForClient();
     }
 
 }
