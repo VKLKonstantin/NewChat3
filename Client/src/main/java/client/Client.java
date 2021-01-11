@@ -85,7 +85,6 @@ public class Client extends Application {
     public void openMainChatWindow() throws IOException {
         authStage.close();
         primaryStage.show();
-
         primaryStage.setTitle(network.getUsername());
         primaryStage.setAlwaysOnTop(true);
         mainWindowController.setLabel(network.getUsername());
